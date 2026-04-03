@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite both the paper and this repository."
+title: "Smooth Windowing for Pseudo-Spectral Quantum Dynamics"
+type: software
+authors:
+  - family-names: "Ariza-Ruiz"
+    given-names: "David"
+    email: "david.ariza@professor.universidadviu.com"
+    affiliation: "Valencian International University (VIU), Spain"
+    orcid: ""
+repository-code: "https://github.com/davidarizaruiz-VIU/smooth-windowing-quantum"
+license: MIT
+version: "1.0.0"
+date-released: "2026-04-03"
+keywords:
+  - pseudo-spectral methods
+  - absorbing boundary conditions
+  - bump functions
+  - Schrodinger equation
+  - Fourier series
+  - windowing
+  - quantum dynamics
+  - wrap-around error
+preferred-citation:
+  type: article
+  authors:
+    - family-names: "Ariza-Ruiz"
+      given-names: "David"
+  title: "Eliminating Wrap-Around Errors in Pseudo-Spectral Quantum Dynamics via C-infinity Windowing"
+  journal: "Computer Physics Communications"
+  year: 2026
