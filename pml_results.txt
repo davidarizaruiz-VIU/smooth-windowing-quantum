@@ -1,0 +1,19 @@
+PML Benchmark Results — 1D Schrodinger
+Equation: i dt psi = -(1/2) dxx psi
+Domain [-10.0, 10.0], rho=8.5, T=0.9
+PML: N=4096, dt=0.0005, profile=quadratic
+FFT: N=2048, dt=0.005, window=Bergold-Lasser bump
+
+C_inf window (N=2048): spur = 3.069551e-10, plat = 0.500421
+
+ sigma_max            spur         norm    norm_plat
+      0.25    3.367896e-12     0.810142     0.509048
+      0.50    1.538985e-11     0.762944     0.509037
+      1.00    6.773034e-11     0.719258     0.509036
+      2.00    2.693809e-10     0.680785     0.509034
+      5.00    1.324668e-09     0.638740     0.509030
+     10.00    3.676586e-09     0.613237     0.509027
+     20.00    9.038181e-09     0.592463     0.509024
+     50.00    2.687018e-08     0.571027     0.509020
+
+Optimal: sigma_max = 0.25, spur = 3.367896e-12
