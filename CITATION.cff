@@ -11,21 +11,21 @@ authors:
 repository-code: "https://github.com/davidarizaruiz-VIU/smooth-windowing-quantum"
 license: MIT
 version: "1.0.0"
-date-released: "2026-04-03"
+date-released: "2026-04-05"
 keywords:
+  - parameter-free absorbing boundary
   - pseudo-spectral methods
-  - absorbing boundary conditions
+  - split-step Fourier method
   - bump functions
-  - Schrodinger equation
-  - Fourier series
-  - windowing
-  - quantum dynamics
+  - windowed Fourier series
+  - time-dependent Schrodinger equation
   - wrap-around error
+  - super-algebraic convergence
 preferred-citation:
   type: article
   authors:
     - family-names: "Ariza-Ruiz"
       given-names: "David"
-  title: "Eliminating Wrap-Around Errors in Pseudo-Spectral Quantum Dynamics via C-infinity Windowing"
+  title: "Parameter-Free Absorbing Boundaries for Pseudo-Spectral Quantum Dynamics via C-infinity Windowing"
   journal: "Computer Physics Communications"
   year: 2026
