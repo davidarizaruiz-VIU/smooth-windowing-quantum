@@ -1,31 +1,34 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite both the paper and this repository."
-title: "Smooth Windowing for Pseudo-Spectral Quantum Dynamics"
+message: "If you use this software, please cite the accompanying paper."
+title: "smooth-windowing-quantum"
 type: software
+license: MIT
 authors:
   - family-names: "Ariza-Ruiz"
     given-names: "David"
     email: "david.ariza@professor.universidadviu.com"
-    affiliation: "Valencian International University (VIU), Spain"
+    affiliation: "Faculty of Engineering, Science and Technology, Valencian International University, Valencia, Spain"
     orcid: ""
-repository-code: "https://github.com/davidarizaruiz-VIU/smooth-windowing-quantum"
-license: MIT
-version: "1.0.0"
-date-released: "2026-04-05"
-keywords:
-  - parameter-free absorbing boundary
-  - pseudo-spectral methods
-  - split-step Fourier method
-  - bump functions
-  - windowed Fourier series
-  - time-dependent Schrodinger equation
-  - wrap-around error
-  - super-algebraic convergence
 preferred-citation:
   type: article
+  title: "Parameter-Free Absorbing Boundaries for Pseudo-Spectral Quantum Dynamics via C-infinity Windowing"
   authors:
     - family-names: "Ariza-Ruiz"
       given-names: "David"
-  title: "Parameter-Free Absorbing Boundaries for Pseudo-Spectral Quantum Dynamics via C-infinity Windowing"
   journal: "Computer Physics Communications"
   year: 2026
+  doi: ""
+  abstract: >-
+    A parameter-free absorbing boundary condition for FFT-based split-step
+    solvers of the time-dependent Schrodinger equation based on compactly
+    supported C-infinity bump functions with super-algebraic convergence
+    guarantees.
+  keywords:
+    - "parameter-free absorbing boundary"
+    - "pseudo-spectral methods"
+    - "split-step Fourier method"
+    - "C-infinity bump functions"
+    - "windowed Fourier series"
+    - "time-dependent Schrodinger equation"
+    - "perfectly matched layer"
+    - "super-algebraic convergence"

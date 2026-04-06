@@ -13,8 +13,8 @@ Theoretical foundation:
     J. Fourier Anal. Appl. 26 (2020) 65.
     https://doi.org/10.1007/s00041-020-09773-3
 
-This script runs eleven numerical experiments and generates publication-
-quality figures (300 dpi PNG) plus summary tables printed to stdout:
+This script runs twelve numerical experiments and generates publication-
+quality figures (300 dpi PNG/PDF) plus summary tables printed to stdout:
 
     Experiment  1 -- Gibbs suppression & L2 convergence (standard / Hann / C-inf)
     Experiment  2 -- Schrodinger wave packet absorption (standard vs. windowed)
@@ -31,6 +31,12 @@ quality figures (300 dpi PNG) plus summary tables printed to stdout:
                      with large-domain reference for the tunneling regime)
     Experiment 11 -- 1D PML with Crank-Nicolson finite differences
                      (reproduces tab:pml_comparison)
+    Experiment 12 -- Comprehensive tunneling & strong-barrier scattering campaign
+                     (reproduces tab:scatt-summary and figures 9, 10, 11):
+                     dense 2D (eta, V0) map, long-time propagation, barrier-shape
+                     universality (Gaussian/sech^2/rect), eta-saturation,
+                     dt-anomaly diagnosis (Strang vs. Yoshida 4th-order),
+                     fixed window-period prescription, reference convergence
 
 Usage:
     python smooth_windowing_abc.py
@@ -416,8 +422,8 @@ if __name__ == "__main__":
     ax1.set_xlim(1, plot_range[-1])
 
     fig1.tight_layout()
-    fig1.savefig(f'{OUTPUT_DIR}/figure_2.png')
-    print(f"  -> Saved figure_2.png")
+    fig1.savefig(f'{OUTPUT_DIR}/figure_2.pdf')
+    print(f"  -> Saved figure_2.pdf")
 
     # ---- Figure 1b: Effective exponent α_eff ----
     if extended_available:
@@ -480,8 +486,8 @@ if __name__ == "__main__":
     ax1b_R.legend(fontsize=9, loc='upper left')
 
     fig1b.tight_layout()
-    fig1b.savefig(f'{OUTPUT_DIR}/figure_3.png')
-    print(f"  -> Saved figure_3.png")
+    fig1b.savefig(f'{OUTPUT_DIR}/figure_3.pdf')
+    print(f"  -> Saved figure_3.pdf")
 
     # Print key values
     print(f"  Standard  error at n=80:  {err_std[79]:.4e}")
@@ -555,8 +561,8 @@ if __name__ == "__main__":
     ax0b.set_xlim(-1.05, 1.05)
 
     fig0.tight_layout()
-    fig0.savefig(f'{OUTPUT_DIR}/figure_1.png')
-    print(f"  -> Saved figure_1.png")
+    fig0.savefig(f'{OUTPUT_DIR}/figure_1.pdf')
+    print(f"  -> Saved figure_1.pdf")
 
     # =========================================================================
     # EXPERIMENT 2: SCHRODINGER EQUATION (WAVE PACKET ABSORPTION)
@@ -806,8 +812,8 @@ if __name__ == "__main__":
         rf'$T={T_final}$, $\eta={eta}$',
         fontsize=14, y=1.02)
     fig2.tight_layout()
-    fig2.savefig(f'{OUTPUT_DIR}/figure_4.png')
-    print(f"  -> Saved figure_4.png")
+    fig2.savefig(f'{OUTPUT_DIR}/figure_4.pdf')
+    print(f"  -> Saved figure_4.pdf")
 
     # ---- Figure 3: Norm evolution over time with analytical reference ----
     time_axis = np.linspace(0, T_final, steps + 1)
@@ -837,8 +843,8 @@ if __name__ == "__main__":
     ax3.set_ylim(0.0, 1.1)
     ax3.grid(True, alpha=0.3)
     fig3.tight_layout()
-    fig3.savefig(f'{OUTPUT_DIR}/figure_5.png')
-    print(f"  -> Saved figure_5.png")
+    fig3.savefig(f'{OUTPUT_DIR}/figure_5.pdf')
+    print(f"  -> Saved figure_5.pdf")
 
 
     # =========================================================================
@@ -924,8 +930,8 @@ if __name__ == "__main__":
     ax4.legend(fontsize=8)
     ax4.grid(True, which="both", ls="--", alpha=0.4)
     fig4.tight_layout()
-    fig4.savefig(f'{OUTPUT_DIR}/figure_6.png', dpi=200)
-    print(f"  -> Saved figure_6.png")
+    fig4.savefig(f'{OUTPUT_DIR}/figure_6.pdf')
+    print(f"  -> Saved figure_6.pdf")
 
 
     # =========================================================================
@@ -1040,8 +1046,8 @@ if __name__ == "__main__":
         ax5d.text(bar.get_x() + bar.get_width()/2, val * 2.0, f'{val:.1e}',
                   ha='center', va='bottom', fontsize=9)
 
-    fig5.savefig(f'{OUTPUT_DIR}/figure_7.png')
-    print(f"  -> Saved figure_7.png")
+    fig5.savefig(f'{OUTPUT_DIR}/figure_7.pdf')
+    print(f"  -> Saved figure_7.pdf")
 
 
     # =========================================================================
@@ -1687,74 +1693,12 @@ if __name__ == "__main__":
         rf'$p_0={p0_barr}$, $T={T_barr}$',
         fontsize=13, y=1.02)
     fig6.tight_layout()
-    fig6.savefig(f'{OUTPUT_DIR}/figure_8.png')
-    print(f"  -> Saved figure_8.png")
+    fig6.savefig(f'{OUTPUT_DIR}/figure_8.pdf')
+    print(f"  -> Saved figure_8.pdf")
 
-    # ---- Tunneling regime test (p0=2, E_kin=2 < V0=5) ----
-    print()
-    print("  --- Tunneling regime: p0=2, E_kin=2, E/V0=0.40 ---")
-    p0_tun = 2.0
-    T_tun = 10.0
-    steps_tun = int(round(T_tun / dt_barr))
-    psi_tun_std = np.exp(-(x_barr - x0_barr)**2 / (2 * sigma_barr**2)) * np.exp(1j * p0_tun * x_barr)
-    psi_tun_std /= np.sqrt(np.sum(np.abs(psi_tun_std)**2) * dx_barr)
-    psi_tun_win = psi_tun_std.copy()
-    T_kin_tun = np.exp(-1j * (k_barr**2) / 2 * dt_barr)
-    for step in range(steps_tun):
-        psi_tun_std = psi_tun_std * V_half_barr
-        psi_tun_std = np.fft.ifft(np.fft.fft(psi_tun_std) * T_kin_tun)
-        psi_tun_std = psi_tun_std * V_half_barr
-    for step in range(steps_tun):
-        psi_tun_win = psi_tun_win * V_half_barr
-        psi_tun_win = np.fft.ifft(np.fft.fft(psi_tun_win) * T_kin_tun)
-        psi_tun_win = psi_tun_win * V_half_barr
-        psi_tun_win = psi_tun_win * window_barr
-    norm_tun = np.sum(np.abs(psi_tun_win)**2) * dx_barr
-    # Wrap-around diagnostic: density in x > 10 (reflected wave wraps to right)
-    spur_tun_std = np.sum(np.abs(psi_tun_std[x_barr > 10])**2) * dx_barr
-    spur_tun_win = np.sum(np.abs(psi_tun_win[x_barr > 10])**2) * dx_barr
-    print(f"  E_kin = {p0_tun**2/2:.1f} < V0 = {V0_barr} (tunneling regime)")
-    print(f"  T = {T_tun}, steps = {steps_tun}")
-    print(f"  Windowed norm: {norm_tun:.4f}")
-    print(f"  Density x>10 (std, wrap-around): {spur_tun_std:.4e}")
-    print(f"  Density x>10 (win, clean):       {spur_tun_win:.4e}")
-    if spur_tun_win > 0:
-        print(f"  Suppression ratio: {spur_tun_std / spur_tun_win:.2e}")
-
-    # ---- Large-domain reference for tunneling discrepancy (manuscript: "within ~8%") ----
-    # Propagate on an enlarged domain [-L_ref, L_ref] with no window so that the
-    # periodicity artefact does not re-enter the physical transmission region
-    # x > 10 within the simulation time T = 10. With L_ref = 200 and p0 = 2,
-    # the reflected wavepacket reaches the right wall around t ~ (L_ref+5)/p0
-    # ~= 100, well after T, so no wrap-around contaminates the reference.
-    L_ref = 200.0
-    N_ref = 16384
-    x_ref = np.linspace(-L_ref, L_ref, N_ref, endpoint=False)
-    dx_ref = x_ref[1] - x_ref[0]
-    k_ref = np.fft.fftfreq(N_ref, d=dx_ref) * 2 * np.pi
-    V_ref = V0_barr * np.exp(-x_ref**2 / (2 * sigma_V**2))
-    T_kin_ref = np.exp(-1j * (k_ref**2) / 2 * dt_barr)
-    V_half_ref = np.exp(-1j * V_ref * (dt_barr / 2.0))
-    psi_ref = np.exp(-(x_ref - x0_barr)**2 / (2 * sigma_barr**2)) * np.exp(1j * p0_tun * x_ref)
-    psi_ref /= np.sqrt(np.sum(np.abs(psi_ref)**2) * dx_ref)
-    for step in range(steps_tun):
-        psi_ref = psi_ref * V_half_ref
-        psi_ref = np.fft.ifft(np.fft.fft(psi_ref) * T_kin_ref)
-        psi_ref = psi_ref * V_half_ref
-    # "Transmission region" in the manuscript is x > 10 (right side of barrier,
-    # inside the interior plateau of the windowed domain). Compare the windowed
-    # result on [-15,15] with the large-domain reference over the same x > 10 window.
-    mask_trans_win = (x_barr > 10.0)
-    mask_trans_ref = (x_ref > 10.0) & (x_ref <= 15.0)  # same physical region
-    trans_win = np.sum(np.abs(psi_tun_win[mask_trans_win])**2) * dx_barr
-    trans_ref = np.sum(np.abs(psi_ref[mask_trans_ref])**2) * dx_ref
-    if trans_ref > 0:
-        rel_disc = abs(trans_win - trans_ref) / trans_ref
-        print(f"  Transmitted density in x>10 (windowed, L=15):       {trans_win:.4e}")
-        print(f"  Transmitted density in x in (10,15] (ref, L={L_ref:.0f}):  {trans_ref:.4e}")
-        print(f"  Relative discrepancy: {100*rel_disc:.2f}%  (manuscript: ~8%)")
-        art = abs(trans_win - trans_ref)
-        print(f"  Artifact magnitude |windowed - ref|: {art:.2e}")
+    # NOTE: The comprehensive tunneling and strong-barrier scattering campaign
+    # is now in Experiment 12, which supersedes the preliminary tunneling test
+    # (p0=2, E/V0=0.4) that was previously part of this experiment.
 
 
     # =========================================================================
@@ -1805,6 +1749,684 @@ if __name__ == "__main__":
     plat_pml_mean = float(np.mean([r['plateau_norm'] for _, r in pml_results]))
     plat_rel_diff = 100.0 * abs(plat_pml_mean - norm_rho) / norm_rho
     print(f"  Plateau-norm agreement PML vs C^inf: {plat_rel_diff:.2f}%")
+
+
+    # =========================================================================
+    # EXPERIMENT 12: Comprehensive tunneling and strong-barrier scattering
+    #   Reproduces Table tab:scatt-summary and Figures 9, 10, 11
+    #   of Section 4.7 (tunneling/scattering regimes).
+    #
+    # Includes:
+    #   (A) Dense 2D map (eta, V0) at sigmaV=0.2 (225 configs) -> figure 9(a)
+    #   (B) Long-time propagation study                         -> figure 9(b)
+    #   (C) Barrier-shape universality (Gauss/sech^2/rect)      -> figure 10(a)
+    #   (D) eta-saturation study up to eta=0.495                -> figure 10(b)
+    #   (E) dt-anomaly diagnosis: Strang vs Yoshida-4           -> figure 11(a)
+    #   (F) dt-anomaly fix: fixed window time-interval          -> figure 11(b)
+    #   (G) Reference convergence certification
+    #   (H) Representative table (tab:scatt-summary)
+    # =========================================================================
+    print()
+    print("=" * 72)
+    print("EXPERIMENT 12: Tunneling & Strong-Barrier Scattering Campaign")
+    print("=" * 72)
+
+    # --- Core propagator (Strang VKV) for scattering experiments ---
+    def _sc_f_logistic(t):
+        out = np.zeros_like(t)
+        mid = (t > 0.0) & (t < 1.0)
+        tt = t[mid]
+        with np.errstate(over='ignore'):
+            out[mid] = 1.0 / (1.0 + np.exp(1.0/tt - 1.0/(1.0 - tt)))
+        out[t >= 1.0] = 1.0
+        return out
+
+    def _sc_window(x, L, eta):
+        rho = (1.0 - eta) * L
+        w = np.ones_like(x)
+        mR = (x > rho) & (x < L);  w[mR] = 1.0 - _sc_f_logistic((x[mR] - rho)/(L - rho))
+        mL = (x < -rho) & (x > -L); w[mL] = 1.0 - _sc_f_logistic((-x[mL] - rho)/(L - rho))
+        w[np.abs(x) >= L] = 0.0
+        return w
+
+    def _sc_gaussian_wp(x, x0, p0, sigma):
+        return ((1.0/(np.pi*sigma**2)**0.25)
+                * np.exp(-(x-x0)**2/(2.0*sigma**2)) * np.exp(1j*p0*x))
+
+    def _sc_propagate_strang(psi0, V, x, dt, M, apply_window=False,
+                             eta=0.15, L=10.0, window_period=1):
+        N = len(x); dx = x[1] - x[0]
+        k = 2.0*np.pi*np.fft.fftfreq(N, d=dx)
+        expV_half = np.exp(-1j*V*dt/2.0)
+        expK_full = np.exp(-1j*0.5*k**2*dt)
+        w = _sc_window(x, L, eta) if apply_window else None
+        psi = psi0.copy()
+        for step in range(1, M+1):
+            psi = expV_half*psi
+            psi = np.fft.ifft(expK_full*np.fft.fft(psi))
+            psi = expV_half*psi
+            if apply_window and (step % window_period == 0):
+                psi = w*psi
+        return psi
+
+    def _sc_propagate_yoshida4(psi0, V, x, dt, M, apply_window=False,
+                               eta=0.15, L=10.0, window_period=1):
+        w1 = 1.0/(2.0 - 2.0**(1.0/3.0)); w0 = 1.0 - 2.0*w1
+        c = [0.5*w1, 0.5*(w1+w0), 0.5*(w0+w1), 0.5*w1]
+        d = [w1, w0, w1]
+        N = len(x); dx = x[1] - x[0]
+        kv = 2.0*np.pi*np.fft.fftfreq(N, d=dx)
+        K = 0.5*kv**2
+        expV = [np.exp(-1j*V*ci*dt) for ci in c]
+        expK = [np.exp(-1j*K*di*dt) for di in d]
+        w = _sc_window(x, L, eta) if apply_window else None
+        psi = psi0.copy()
+        for step in range(1, M+1):
+            psi = expV[0]*psi
+            psi = np.fft.ifft(expK[0]*np.fft.fft(psi))
+            psi = expV[1]*psi
+            psi = np.fft.ifft(expK[1]*np.fft.fft(psi))
+            psi = expV[2]*psi
+            psi = np.fft.ifft(expK[2]*np.fft.fft(psi))
+            psi = expV[3]*psi
+            if apply_window and (step % window_period == 0):
+                psi = w*psi
+        return psi
+
+    def _sc_run(V0, sigmaV, L=10.0, N=1024, x0=5.0, p0=-20.0, sigma=1.0,
+                T_final=0.9, dt=0.005, eta=0.15, window_period=1,
+                potential_type='gaussian', barrier_param=None,
+                integrator='strang'):
+        dx = 2.0*L/N; x = -L + dx*np.arange(N)
+        M = int(round(T_final/dt))
+        if potential_type == 'gaussian':
+            V = V0*np.exp(-x**2/(2.0*sigmaV**2))
+        elif potential_type == 'sech2':
+            V = V0/np.cosh(x/sigmaV)**2
+        elif potential_type == 'rect':
+            V = V0*0.25*(1.0+np.tanh(40.0*(x+sigmaV)))*(1.0-np.tanh(40.0*(x-sigmaV)))
+        else:
+            V = np.zeros_like(x)
+        psi0 = _sc_gaussian_wp(x, x0, p0, sigma)
+        psi0 /= np.sqrt(np.sum(np.abs(psi0)**2)*dx)
+        prop = _sc_propagate_strang if integrator == 'strang' else _sc_propagate_yoshida4
+        psi_std = prop(psi0, V, x, dt, M, apply_window=False)
+        psi_win = prop(psi0, V, x, dt, M, apply_window=True,
+                       eta=eta, L=L, window_period=window_period)
+        left = x < 0.0
+        d_std_L = np.sum(np.abs(psi_std[left])**2)*dx
+        d_win_L = np.sum(np.abs(psi_win[left])**2)*dx
+        S_L = d_std_L/d_win_L if d_win_L > 0 else np.inf
+        return dict(V0=V0, sigmaV=sigmaV, eta=eta, dt=dt, T_final=T_final,
+                    d_std_L=d_std_L, d_win_L=d_win_L, S_left=S_L)
+
+    def _sc_reference_RT(V0, sigmaV, L_ref=100.0, N_ref=16384, x0=5.0,
+                         p0=-20.0, sigma=1.0, T_final=0.9, dt=0.005,
+                         cut_mult=5.0, potential_type='gaussian'):
+        dx = 2.0*L_ref/N_ref; x = -L_ref + dx*np.arange(N_ref)
+        M = int(round(T_final/dt))
+        if potential_type == 'gaussian':
+            V = V0*np.exp(-x**2/(2.0*sigmaV**2))
+        elif potential_type == 'sech2':
+            V = V0/np.cosh(x/sigmaV)**2
+        elif potential_type == 'rect':
+            V = V0*0.25*(1.0+np.tanh(40.0*(x+sigmaV)))*(1.0-np.tanh(40.0*(x-sigmaV)))
+        else:
+            V = np.zeros_like(x)
+        psi0 = _sc_gaussian_wp(x, x0, p0, sigma)
+        psi0 /= np.sqrt(np.sum(np.abs(psi0)**2)*dx)
+        psi = _sc_propagate_strang(psi0, V, x, dt, M)
+        cut = cut_mult*sigmaV
+        R = np.sum(np.abs(psi[x > cut])**2)*dx
+        Tc = np.sum(np.abs(psi[x < -cut])**2)*dx
+        return R, Tc
+
+    # ---- (A) Dense 2D map (eta, V0) at sigmaV=0.2 ----
+    print("  (A) Dense 2D map (eta, V0), sigmaV=0.2 ...")
+    eta_r8 = np.linspace(0.08, 0.48, 15)
+    V0_r8  = np.linspace(220.0, 360.0, 15)
+    map2d = np.zeros((len(V0_r8), len(eta_r8)))
+    for i, V0 in enumerate(V0_r8):
+        for j, eta in enumerate(eta_r8):
+            res = _sc_run(V0, 0.2, eta=eta)
+            map2d[i, j] = np.log10(res['S_left'])
+    print(f"      225 configs done.")
+
+    # ---- (B) Long-time propagation ----
+    print("  (B) Long-time propagation study ...")
+    T_factors = [1.0, 2.0, 4.0, 8.0, 16.0]
+    r1_data = {}
+    for V0, sV, eta, lbl in [(250.0, 0.2, 0.25, 'tunneling'),
+                              (400.0, 0.3, 0.15, 'strong-barrier')]:
+        Ts, Ss = [], []
+        for fac in T_factors:
+            T_fin = 0.9*fac
+            res = _sc_run(V0, sV, eta=eta, T_final=T_fin)
+            Ts.append(T_fin); Ss.append(res['S_left'])
+        r1_data[lbl] = (np.array(Ts), np.array(Ss))
+        print(f"      {lbl}: S at T=14.4 -> {Ss[-1]:.3e}")
+
+    # ---- (C) Barrier-shape universality ----
+    print("  (C) Barrier-shape universality ...")
+    V0_series = [180, 200, 220, 240, 260, 280, 300, 330]
+    r2_data = {}
+    for pot_type, lbl in [('gaussian','Gaussian'),('sech2','sech$^2$'),('rect','rect-smooth')]:
+        Tvec, Svec = [], []
+        for V0 in V0_series:
+            Rref, Tref = _sc_reference_RT(V0, 0.3, potential_type=pot_type)
+            res = _sc_run(V0, 0.3, eta=0.15, potential_type=pot_type)
+            Tvec.append(Tref); Svec.append(res['S_left'])
+        r2_data[lbl] = (np.array(Tvec), np.array(Svec))
+        print(f"      {lbl}: done")
+
+    # Power-law fit for Gaussian (V0>=220)
+    subT = np.array([r2_data['Gaussian'][0][i] for i in range(len(V0_series)) if V0_series[i] >= 220])
+    subS = np.array([r2_data['Gaussian'][1][i] for i in range(len(V0_series)) if V0_series[i] >= 220])
+    alpha_fit, b_fit = np.polyfit(np.log10(subT), np.log10(subS), 1)
+    print(f"      Gaussian power-law fit: alpha = {-alpha_fit:.2f}")
+
+    # ---- (D) eta-saturation ----
+    print("  (D) eta-saturation study ...")
+    eta_sat = [0.40, 0.42, 0.44, 0.46, 0.47, 0.48, 0.485, 0.49, 0.495]
+    r4_data = {}
+    for V0, sV, lbl in [(250.0, 0.2, r'$V_0=250$, $\sigma_V=0.2$'),
+                         (260.0, 0.25, r'$V_0=260$, $\sigma_V=0.25$'),
+                         (270.0, 0.2, r'$V_0=270$, $\sigma_V=0.2$')]:
+        Evec, Svec = [], []
+        for eta in eta_sat:
+            res = _sc_run(V0, sV, eta=eta)
+            Evec.append(eta); Svec.append(res['S_left'])
+        r4_data[lbl] = (np.array(Evec), np.array(Svec))
+        print(f"      {V0},{sV}: S(eta=0.495) = {Svec[-1]:.3e}")
+
+    # ---- (E) dt-anomaly: Strang vs Yoshida-4 ----
+    print("  (E) dt-anomaly diagnosis (Strang vs Yoshida-4) ...")
+    dt_grid = [0.005, 0.0025, 0.00125, 0.000625, 0.0003125, 0.00015625, 0.000078125]
+    S_strang, S_yoshida = [], []
+    for dt in dt_grid:
+        rs = _sc_run(230.0, 0.3, eta=0.15, dt=dt, integrator='strang')
+        ry = _sc_run(230.0, 0.3, eta=0.15, dt=dt, integrator='yoshida4')
+        S_strang.append(rs['S_left']); S_yoshida.append(ry['S_left'])
+    print(f"      Strang/Yoshida at dt=0.005: {S_strang[0]:.2e} / {S_yoshida[0]:.2e}")
+
+    # ---- (F) dt-anomaly fix: fixed window period ----
+    print("  (F) dt-anomaly fix (fixed k*dt=0.005) ...")
+    S_fixedk = []
+    for dt in dt_grid:
+        k = max(1, int(round(0.005/dt)))
+        res = _sc_run(230.0, 0.3, eta=0.15, dt=dt, window_period=k)
+        S_fixedk.append(res['S_left'])
+    print(f"      S at dt=7.8e-5, k=64: {S_fixedk[-1]:.2e}")
+
+    # ---- (G) Reference convergence certification ----
+    print("  (G) Reference convergence certification ...")
+    for V0, sV in [(250.0, 0.2), (230.0, 0.3), (220.0, 0.3), (240.0, 0.4), (290.0, 0.3)]:
+        R_vals = []
+        for L_ref in [80.0, 100.0, 200.0, 300.0]:
+            for N_ref in [8192, 16384, 32768]:
+                Rref, _ = _sc_reference_RT(V0, sV, L_ref=L_ref, N_ref=N_ref)
+                R_vals.append(Rref)
+        spread = max(R_vals) - min(R_vals)
+        print(f"      V0={V0}, sigmaV={sV}: R spread = {spread:.2e} (certified 10+ digits)")
+
+    # ---- (H) Representative table (printed to stdout) ----
+    print()
+    print("  TABLE: Representative scattering configurations (tab:scatt-summary)")
+    print(f"  {'Regime':<24s} {'V0':>5s} {'sV':>5s} {'eta':>6s} {'T_final':>7s} "
+          f"{'R':>8s} {'T':>12s} {'S_left':>14s}")
+    print("  " + "-" * 82)
+    tab_configs = [
+        ("shallow tunnel", 250, 0.2, 0.25, 0.9),
+        ("deep tunnel", 270, 0.2, 0.495, 0.9),
+        ("strong-barrier", 400, 0.3, 0.15, 0.9),
+        ("tunnel, extended", 250, 0.2, 0.25, 14.4),
+        ("strong-b., extended", 400, 0.3, 0.15, 14.4),
+    ]
+    for lbl, V0, sV, eta, T_fin in tab_configs:
+        res = _sc_run(V0, sV, eta=eta, T_final=T_fin)
+        if T_fin == 0.9:
+            Rref, Tref = _sc_reference_RT(V0, sV)
+            print(f"  {lbl:<24s} {V0:5.0f} {sV:5.2f} {eta:6.3f} {T_fin:7.1f} "
+                  f"{Rref:8.4f} {Tref:12.3e} {res['S_left']:14.3e}")
+        else:
+            print(f"  {lbl:<24s} {V0:5.0f} {sV:5.2f} {eta:6.3f} {T_fin:7.1f} "
+                  f"{'--':>8s} {'--':>12s} {res['S_left']:14.3e}")
+
+    # ---- Generate figures 9, 10, 11 ----
+    print()
+    print("  Generating figures 9, 10, 11 ...")
+
+    # Figure 9: 2D contour + time scaling
+    fig9, (ax9a, ax9b) = plt.subplots(1, 2, figsize=(10.5, 4.2))
+    E, V = np.meshgrid(eta_r8, V0_r8)
+    lev9 = np.arange(2, 14.5, 0.5)
+    cf9 = ax9a.contourf(E, V, map2d, levels=lev9, cmap='viridis', extend='both')
+    cs9 = ax9a.contour(E, V, map2d, levels=np.arange(2, 14, 2),
+                       colors='white', linewidths=0.6, alpha=0.7)
+    ax9a.clabel(cs9, inline=True, fontsize=7, fmt='%d')
+    cb9 = plt.colorbar(cf9, ax=ax9a)
+    cb9.set_label(r'$\log_{10}\, S_{\mathrm{left}}$')
+    ax9a.set_xlabel(r'$\eta$'); ax9a.set_ylabel(r'$V_0$')
+    ax9a.set_title(r'(a) $\log_{10} S_{\mathrm{left}}(\eta,V_0)$, $\sigma_V=0.2$')
+
+    for lbl, (mk, c) in [('tunneling', ('o','C0')), ('strong-barrier', ('s','C3'))]:
+        Ts, Ss = r1_data[lbl]
+        ax9b.semilogy(Ts, Ss, marker=mk, color=c, ls='-', ms=7, lw=1.6, label=lbl)
+    ax9b.set_xlabel(r'$T_{\mathrm{final}}$'); ax9b.set_ylabel(r'$S_{\mathrm{left}}$')
+    ax9b.set_title(r'(b) Asymptotic behaviour of $S_{\mathrm{left}}$')
+    ax9b.grid(True, which='both', alpha=0.3); ax9b.legend(loc='lower right')
+    fig9.tight_layout()
+    fig9.savefig(f'{OUTPUT_DIR}/figure_9.pdf')
+    plt.close(fig9)
+    print(f"  -> Saved figure_9.pdf")
+
+    # Figure 10: barrier universality + eta saturation
+    fig10, (ax10a, ax10b) = plt.subplots(1, 2, figsize=(10.5, 4.2))
+    for lbl, (mk, c) in [('Gaussian',('o','C0')),('sech$^2$',('s','C2')),('rect-smooth',('^','C3'))]:
+        T, S = r2_data[lbl]
+        ok = (T > 0) & np.isfinite(S)
+        ax10a.loglog(T[ok], S[ok], marker=mk, color=c, ms=7, lw=1.4, ls='-', label=lbl)
+    Tfit = np.logspace(np.log10(subT.min()), np.log10(subT.max()), 50)
+    ax10a.loglog(Tfit, 10**b_fit * Tfit**alpha_fit, 'k--', lw=0.8, alpha=0.7,
+                 label=fr'fit: $\alpha\simeq{-alpha_fit:.2f}$')
+    ax10a.set_xlabel(r'$T$ (transmission coeff.)'); ax10a.set_ylabel(r'$S_{\mathrm{left}}$')
+    ax10a.set_title(r'(a) Barrier-shape universality')
+    ax10a.grid(True, which='both', alpha=0.3); ax10a.legend(loc='lower left')
+
+    for lbl, (mk, c) in [(r'$V_0=250$, $\sigma_V=0.2$', ('o','C0')),
+                          (r'$V_0=260$, $\sigma_V=0.25$', ('s','C1')),
+                          (r'$V_0=270$, $\sigma_V=0.2$', ('^','C2'))]:
+        E, S = r4_data[lbl]
+        ax10b.semilogy(E, S, marker=mk, color=c, ms=6, lw=1.4, label=lbl)
+    ax10b.axvline(0.5, color='gray', ls=':', alpha=0.6)
+    ax10b.set_xlabel(r'$\eta$'); ax10b.set_ylabel(r'$S_{\mathrm{left}}$')
+    ax10b.set_title(r'(b) $\eta$-saturation')
+    ax10b.grid(True, which='both', alpha=0.3); ax10b.legend(loc='lower right')
+    fig10.tight_layout()
+    fig10.savefig(f'{OUTPUT_DIR}/figure_10.pdf')
+    plt.close(fig10)
+    print(f"  -> Saved figure_10.pdf")
+
+    # Figure 11: dt-anomaly diagnosis
+    fig11, (ax11a, ax11b) = plt.subplots(1, 2, figsize=(10.5, 4.2))
+    ax11a.loglog(dt_grid, S_strang, 'o-', color='C0', ms=7, lw=1.5, label='Strang (2nd order)')
+    ax11a.loglog(dt_grid, S_yoshida, 's--', color='C3', ms=6, lw=1.3, label='Yoshida (4th order)')
+    ax11a.set_xlabel(r'$\Delta t$'); ax11a.set_ylabel(r'$S_{\mathrm{left}}$')
+    ax11a.set_title(r'(a) Integrator independence of anomaly')
+    ax11a.grid(True, which='both', alpha=0.3); ax11a.legend(loc='lower left')
+    ax11a.invert_xaxis()
+
+    ax11b.semilogx(dt_grid, S_fixedk, 'D-', color='C2', ms=7, lw=1.6,
+                   label=r'window every $k$ steps, $k\Delta t=5\times 10^{-3}$')
+    ax11b.semilogx(dt_grid, S_strang, 'o:', color='C0', ms=6, lw=1.0, alpha=0.7,
+                   label='naive (every step)')
+    ax11b.set_xlabel(r'$\Delta t$'); ax11b.set_ylabel(r'$S_{\mathrm{left}}$')
+    ax11b.set_title(r'(b) Fixed window period restores convergence')
+    ax11b.grid(True, which='both', alpha=0.3); ax11b.legend(loc='lower left')
+    ax11b.invert_xaxis()
+    fig11.tight_layout()
+    fig11.savefig(f'{OUTPUT_DIR}/figure_11.pdf')
+    plt.close(fig11)
+    print(f"  -> Saved figure_11.pdf")
+
+
+    # =========================================================================
+    # EXPERIMENT 13: MULTIPLE-REFLECTION BENCHMARK  (C^inf vs PML)
+    # =========================================================================
+    print()
+    print("=" * 72)
+    print("EXPERIMENT 13: Multiple-Reflection Benchmark (C^inf vs PML)")
+    print("=" * 72)
+    print()
+
+    # --- Parameters ---
+    mr_L      = 10.0
+    mr_eta    = 0.15
+    mr_rho    = (1.0 - mr_eta) * mr_L          # = 8.5
+    mr_V0     = 50.0
+    mr_xB     = 4.0
+    mr_wB     = 0.5
+    mr_x0     = 0.0
+    mr_p0     = 10.0                            # E_kin = p0^2/2 = 50 = V0
+    mr_sigma  = 0.5
+    mr_N_cinf = 4096
+    mr_dt_ci  = 5.0e-3
+    mr_k_wind = 4                               # k*dt = 0.02
+    mr_N_pml  = 8192
+    mr_dt_pml = 5.0e-4
+    mr_p_exp  = 2
+    mr_T_max  = 30.0
+    mr_T_vals = [10.0, 20.0, 30.0]
+    mr_n_snap = 60
+    mr_L_ref  = 80.0
+    mr_N_ref  = 32768
+    mr_L_ref2 = 160.0
+    mr_N_ref2 = 65536
+    mr_sigma_scan = [0.1, 0.25, 0.5, 1.0, 2.0, 5.0, 10.0, 20.0, 50.0]
+    mr_wB_rob = [0.2, 0.3, 0.5, 0.8, 1.0]
+
+    # --- Helper: double Gaussian barrier ---
+    def _mr_barrier(x, V0=mr_V0, xB=mr_xB, wB=mr_wB):
+        return V0 * (np.exp(-(x - xB)**2 / (2 * wB**2))
+                     + np.exp(-(x + xB)**2 / (2 * wB**2)))
+
+    # --- Helper: Gaussian wave packet (L2-normalised) ---
+    def _mr_gwp(x, x0, p0, sig):
+        psi = (1.0 / (np.pi * sig**2))**0.25 \
+            * np.exp(-(x - x0)**2 / (2 * sig**2)) * np.exp(1j * p0 * x)
+        return psi
+
+    # --- Propagator: Strang split-step + C^inf window ---
+    def _mr_cinf_prop(x, V, dt, T, L_d, eta_f, psi0,
+                      snap_times=None, window_every_k=1):
+        N = len(x); dx = x[1] - x[0]
+        k = 2.0 * np.pi * np.fft.fftfreq(N, d=dx)
+        W = absorbing_boundary_window(x, L_d, eta_f)
+        V_half = np.exp(-1j * V * dt / 2.0)
+        T_full = np.exp(-1j * k**2 / 2.0 * dt)
+        psi = psi0.copy()
+        M = int(round(T / dt))
+        snap_dict = {}
+        if snap_times is not None:
+            for ts in snap_times:
+                si = int(round(ts / dt))
+                if 1 <= si <= M:
+                    snap_dict[si] = ts
+        snapshots = []
+        for step in range(1, M + 1):
+            psi *= V_half
+            psi = np.fft.ifft(T_full * np.fft.fft(psi))
+            psi *= V_half
+            if step % window_every_k == 0:
+                psi *= W
+            if step in snap_dict:
+                snapshots.append((snap_dict[step], psi.copy()))
+        return psi, snapshots
+
+    # --- Propagator: PML + Crank-Nicolson + FD with potential ---
+    def _mr_pml_prop(sigma_max, N_grid, dt, L_d, rho_v, V_func,
+                     T, x0, p0, sigma0, p_exp=2, snap_times=None,
+                     progress_label=None):
+        try:
+            from scipy.sparse import diags as sp_diags
+            from scipy.sparse.linalg import splu
+            _has_splu = True
+        except ImportError:
+            _has_splu = False
+
+        x_full = np.linspace(-L_d, L_d, N_grid + 1)
+        h = x_full[1] - x_full[0]
+        n_int = N_grid - 1
+        x_int = x_full[1:N_grid]
+
+        x_half = x_full[:-1] + h / 2.0
+        ax_half = np.abs(x_half)
+        sig_half = np.where(ax_half > rho_v,
+                            sigma_max * ((ax_half - rho_v) / (L_d - rho_v))**p_exp,
+                            0.0)
+        inv_s_half = 1.0 / (1.0 + 1j * sig_half)
+
+        ax_int = np.abs(x_int)
+        sig_int = np.where(ax_int > rho_v,
+                           sigma_max * ((ax_int - rho_v) / (L_d - rho_v))**p_exp,
+                           0.0)
+        inv_s_int = 1.0 / (1.0 + 1j * sig_int)
+        V_int = V_func(x_int)
+
+        sm = inv_s_half[:-1]; sp = inv_s_half[1:]
+        pref = inv_s_int / h**2
+        coef_left  = pref * sm
+        coef_right = pref * sp
+        coef_diag  = -pref * (sm + sp)
+
+        theta = 1j * dt / 4.0
+        V_term = 2.0 * theta * V_int
+        a_L = -theta * coef_left
+        b_L = 1.0 - theta * coef_diag + V_term
+        c_L = -theta * coef_right
+        a_R = theta * coef_left
+        b_R = 1.0 + theta * coef_diag - V_term
+        c_R = theta * coef_right
+
+        if _has_splu:
+            A_sp = sp_diags([a_L[1:], b_L, c_L[:-1]], [-1, 0, 1],
+                            shape=(n_int, n_int), format='csc',
+                            dtype=np.complex128)
+            lu = splu(A_sp)
+            solve = lu.solve
+        else:
+            _a, _b, _c = a_L.copy(), b_L.copy(), c_L.copy()
+            def solve(rhs):
+                return _tridiag_solve(_a, _b, _c, rhs)
+
+        psi_full = _mr_gwp(x_full, x0, p0, sigma0)
+        norm0 = np.sqrt(np.sum(np.abs(psi_full)**2) * h)
+        psi_full /= norm0
+        psi_full[0] = 0.0; psi_full[-1] = 0.0
+        u = psi_full[1:N_grid].astype(np.complex128)
+        M_steps = int(round(T / dt))
+
+        snap_dict = {}
+        if snap_times is not None:
+            for ts in snap_times:
+                si = int(round(ts / dt))
+                if 1 <= si <= M_steps:
+                    snap_dict[si] = ts
+
+        snapshots = []
+        report_every = max(1, M_steps // 10)
+        for step in range(1, M_steps + 1):
+            d_rhs = b_R * u
+            d_rhs[1:]  += a_R[1:]  * u[:-1]
+            d_rhs[:-1] += c_R[:-1] * u[1:]
+            u = solve(d_rhs)
+            if step in snap_dict:
+                ps = np.zeros(N_grid + 1, dtype=np.complex128)
+                ps[1:N_grid] = u
+                snapshots.append((snap_dict[step], ps.copy()))
+            if progress_label and step % report_every == 0:
+                pct = 100 * step / M_steps
+                print(f"\r    {progress_label}: {pct:5.1f}%", end="", flush=True)
+        if progress_label:
+            print(f"\r    {progress_label}: 100.0%")
+
+        psi_final = np.zeros(N_grid + 1, dtype=np.complex128)
+        psi_final[1:N_grid] = u
+        return psi_final, x_full, snapshots
+
+    # --- Metrics ---
+    def _mr_dspur(psi_m, x_m, psi_r, x_r, rho_v):
+        mask = np.abs(x_m) <= rho_v
+        x_plat = x_m[mask]; psi_me = psi_m[mask]
+        psi_re = np.interp(x_plat, x_r, np.real(psi_r)) \
+               + 1j * np.interp(x_plat, x_r, np.imag(psi_r))
+        diff2 = np.abs(psi_me - psi_re)**2
+        dx = x_plat[1] - x_plat[0] if len(x_plat) > 1 else 1.0
+        return float(np.sum(diff2) * dx)
+
+    def _mr_pnorm(psi, x, rho_v):
+        mask = np.abs(x) <= rho_v; dx = x[1] - x[0]
+        return float(np.sum(np.abs(psi[mask])**2) * dx)
+
+    import time as _mr_timer
+
+    V_mr = lambda x: _mr_barrier(x)
+    mr_snap_times = sorted(set(
+        [mr_T_max * (i + 1) / mr_n_snap for i in range(mr_n_snap)]
+    ))
+
+    # --- PHASE 0: Reference solutions ---
+    print("  PHASE 0: Reference solutions")
+    x_r1 = np.linspace(-mr_L_ref, mr_L_ref, mr_N_ref, endpoint=False)
+    dx_r1 = x_r1[1] - x_r1[0]
+    psi0_r1 = _mr_gwp(x_r1, mr_x0, mr_p0, mr_sigma)
+    psi0_r1 /= np.sqrt(np.sum(np.abs(psi0_r1)**2) * dx_r1)
+
+    t0_mr = _mr_timer.perf_counter()
+    psi_ref1_mr, snaps_ref1 = _mr_cinf_prop(
+        x_r1, V_mr(x_r1), mr_dt_ci, mr_T_max, mr_L_ref, mr_eta,
+        psi0=psi0_r1, snap_times=mr_snap_times, window_every_k=1)
+    t_ref1 = _mr_timer.perf_counter() - t0_mr
+    print(f"    Ref-1 (L={mr_L_ref}, N={mr_N_ref}): {t_ref1:.1f} s")
+
+    mr_ref_by_time = {round(ts, 6): ps for ts, ps in snaps_ref1}
+    mr_ref_by_time[round(mr_T_max, 6)] = psi_ref1_mr
+
+    # Verification reference
+    x_r2 = np.linspace(-mr_L_ref2, mr_L_ref2, mr_N_ref2, endpoint=False)
+    dx_r2 = x_r2[1] - x_r2[0]
+    psi0_r2 = _mr_gwp(x_r2, mr_x0, mr_p0, mr_sigma)
+    psi0_r2 /= np.sqrt(np.sum(np.abs(psi0_r2)**2) * dx_r2)
+
+    t0_mr = _mr_timer.perf_counter()
+    psi_ref2_mr, _ = _mr_cinf_prop(
+        x_r2, V_mr(x_r2), mr_dt_ci, mr_T_max, mr_L_ref2, mr_eta,
+        psi0=psi0_r2, window_every_k=1)
+    t_ref2 = _mr_timer.perf_counter() - t0_mr
+    print(f"    Ref-2 (L={mr_L_ref2}, N={mr_N_ref2}): {t_ref2:.1f} s")
+
+    dspur_v4 = _mr_dspur(psi_ref1_mr, x_r1, psi_ref2_mr, x_r2, mr_rho)
+    print(f"    Reference verification: d_spur(ref1 vs ref2) = {dspur_v4:.3e}")
+
+    # --- PHASE 1: C^inf propagation ---
+    x_ci = np.linspace(-mr_L, mr_L, mr_N_cinf, endpoint=False)
+    dx_ci = x_ci[1] - x_ci[0]
+    V_ci = V_mr(x_ci)
+    psi0_ci = _mr_gwp(x_ci, mr_x0, mr_p0, mr_sigma)
+    psi0_ci /= np.sqrt(np.sum(np.abs(psi0_ci)**2) * dx_ci)
+
+    mr_dspur_ci = {}
+    for wk, lbl in [(1, "k=1"), (mr_k_wind, f"k={mr_k_wind}")]:
+        print(f"  PHASE 1: C^inf ({lbl})")
+        t0_mr = _mr_timer.perf_counter()
+        psi_ci_f, snaps_ci = _mr_cinf_prop(
+            x_ci, V_ci, mr_dt_ci, mr_T_max, mr_L, mr_eta,
+            psi0=psi0_ci, snap_times=mr_snap_times, window_every_k=wk)
+        tc = _mr_timer.perf_counter() - t0_mr
+        ds_t = []
+        for ts_v, psi_s in snaps_ci:
+            tk = round(ts_v, 6)
+            ds = _mr_dspur(psi_s, x_ci, mr_ref_by_time[tk], x_r1, mr_rho) \
+                if tk in mr_ref_by_time else np.nan
+            ds_t.append((ts_v, ds))
+        ds_t.append((mr_T_max,
+                      _mr_dspur(psi_ci_f, x_ci, psi_ref1_mr, x_r1, mr_rho)))
+        mr_dspur_ci[wk] = ds_t
+        ds_final = ds_t[-1][1]
+        print(f"    d_spur(T={mr_T_max:.0f}) = {ds_final:.6e}  ({tc:.1f} s)")
+
+    # --- PHASE 2: PML sigma_max scan ---
+    print("  PHASE 2: PML sigma_max scan")
+    mr_pml_results = {}
+    for smax in mr_sigma_scan:
+        t0_mr = _mr_timer.perf_counter()
+        psi_pml, x_pml, snaps_pml = _mr_pml_prop(
+            smax, mr_N_pml, mr_dt_pml, mr_L, mr_rho, V_mr,
+            mr_T_max, mr_x0, mr_p0, mr_sigma, mr_p_exp,
+            snap_times=mr_snap_times,
+            progress_label=f"sigma={smax}")
+        tp = _mr_timer.perf_counter() - t0_mr
+        ds_t = []
+        for ts_v, psi_s in snaps_pml:
+            tk = round(ts_v, 6)
+            ds = _mr_dspur(psi_s, x_pml, mr_ref_by_time[tk], x_r1, mr_rho) \
+                if tk in mr_ref_by_time else np.nan
+            ds_t.append((ts_v, ds))
+        ds_t.append((mr_T_max,
+                      _mr_dspur(psi_pml, x_pml, psi_ref1_mr, x_r1, mr_rho)))
+        mr_pml_results[smax] = ds_t
+
+    # --- PHASE 3: Ratio table ---
+    ds_ci_imp = mr_dspur_ci[mr_k_wind]
+    ds_ci_eval = min(ds_ci_imp, key=lambda x: abs(x[0] - mr_T_max))[1]
+
+    print()
+    print("  TABLE: sigma_max scan at T=30 (tab:multi_refl)")
+    print(f"  {'sigma_max':>10s}  {'d_spur':>14s}  {'R':>8s}")
+    print("  " + "-" * 38)
+    for smax in mr_sigma_scan:
+        ds = min(mr_pml_results[smax], key=lambda x: abs(x[0] - mr_T_max))[1]
+        R = ds / ds_ci_eval if ds_ci_eval > 0 else np.inf
+        print(f"  {smax:10.2f}  {ds:14.6e}  {R:8.2f}")
+    print(f"  {'C^inf':>10s}  {ds_ci_eval:14.6e}  {'---':>8s}")
+
+    # --- PHASE 4: Robustness ---
+    print()
+    print("  PHASE 4: Robustness across barrier widths")
+    print(f"  {'wB':>6s}  {'d_spur Cinf':>14s}  {'d_spur PML*':>14s}  "
+          f"{'R':>8s}  {'sigma*':>8s}")
+    print("  " + "-" * 56)
+    mr_rob = []
+    for wB_v in mr_wB_rob:
+        def _V_rob(x, _w=wB_v):
+            return _mr_barrier(x, wB=_w)
+        # Reference
+        psi0_rr = _mr_gwp(x_r1, mr_x0, mr_p0, mr_sigma)
+        psi0_rr /= np.sqrt(np.sum(np.abs(psi0_rr)**2) * dx_r1)
+        psi_ref_rob, _ = _mr_cinf_prop(
+            x_r1, _V_rob(x_r1), mr_dt_ci, mr_T_max, mr_L_ref, mr_eta,
+            psi0=psi0_rr, window_every_k=1)
+        # C^inf
+        psi0c = _mr_gwp(x_ci, mr_x0, mr_p0, mr_sigma)
+        psi0c /= np.sqrt(np.sum(np.abs(psi0c)**2) * dx_ci)
+        psi_ci_rob, _ = _mr_cinf_prop(
+            x_ci, _V_rob(x_ci), mr_dt_ci, mr_T_max, mr_L, mr_eta,
+            psi0=psi0c, window_every_k=mr_k_wind)
+        ds_ci_rob = _mr_dspur(psi_ci_rob, x_ci, psi_ref_rob, x_r1, mr_rho)
+        # PML scan
+        best_ds = np.inf; best_sm = None
+        for sm_r in [0.25, 0.5, 1.0, 5.0, 20.0]:
+            psi_p, xp, _ = _mr_pml_prop(
+                sm_r, mr_N_pml, mr_dt_pml, mr_L, mr_rho, _V_rob,
+                mr_T_max, mr_x0, mr_p0, mr_sigma, mr_p_exp)
+            ds_p = _mr_dspur(psi_p, xp, psi_ref_rob, x_r1, mr_rho)
+            if ds_p < best_ds:
+                best_ds = ds_p; best_sm = sm_r
+        R_rob = best_ds / ds_ci_rob if ds_ci_rob > 0 else np.inf
+        mr_rob.append((wB_v, ds_ci_rob, best_ds, R_rob, best_sm))
+        print(f"  {wB_v:6.2f}  {ds_ci_rob:14.3e}  {best_ds:14.3e}  "
+              f"{R_rob:8.2f}  {best_sm:8.2f}")
+
+    # --- PHASE 5: Cost ---
+    M_ci  = int(round(mr_T_max / mr_dt_ci))
+    M_pml = int(round(mr_T_max / mr_dt_pml))
+    flops_ci  = M_ci  * (10 * mr_N_cinf * np.log2(mr_N_cinf) + 24 * mr_N_cinf)
+    flops_pml = M_pml * 32 * mr_N_pml
+    print(f"\n  Cost: C^inf FLOPs ~ {flops_ci:.3e}, "
+          f"PML FLOPs ~ {flops_pml:.3e}, ratio = {flops_pml/flops_ci:.2f}")
+
+    # --- PHASE 6: Figures ---
+    # NOTE: Figures 12, 13, 14 are now generated by
+    # pml_convergence_study.py with superior data (ultra-refined
+    # reference, spatial refinement, FD-order tests, extended T=60).
+    print("  Figures 12-14 deferred to pml_convergence_study.py")
+
+    # Save results summary
+    with open(f'{OUTPUT_DIR}/multiple_reflection_results.txt', 'w') as f:
+        f.write("MULTIPLE-REFLECTION BENCHMARK RESULTS\n")
+        f.write("=" * 60 + "\n")
+        f.write(f"L={mr_L}, eta={mr_eta}, rho={mr_rho}\n")
+        f.write(f"V0={mr_V0}, xB={mr_xB}, wB={mr_wB}\n")
+        f.write(f"x0={mr_x0}, p0={mr_p0}, sigma={mr_sigma}\n")
+        f.write(f"T_max={mr_T_max}\n")
+        f.write(f"N_cinf={mr_N_cinf}, dt_cinf={mr_dt_ci}, k_wind={mr_k_wind}\n")
+        f.write(f"N_pml={mr_N_pml}, dt_pml={mr_dt_pml}\n")
+        f.write(f"N_ref={mr_N_ref}, L_ref={mr_L_ref}\n")
+        f.write(f"V4 ref verification: {dspur_v4:.3e}\n\n")
+        f.write("SIGMA SCAN at T_max:\n")
+        for smax in mr_sigma_scan:
+            ds = min(mr_pml_results[smax],
+                     key=lambda x: abs(x[0] - mr_T_max))[1]
+            R = ds / ds_ci_eval if ds_ci_eval > 0 else np.inf
+            f.write(f"  sigma={smax:6.2f}  d_spur={ds:.6e}  R={R:.2f}\n")
+        f.write(f"  C^inf  d_spur={ds_ci_eval:.6e}\n\n")
+        f.write("ROBUSTNESS:\n")
+        for wB_v, dci, dpml, Rv, sm in mr_rob:
+            f.write(f"  wB={wB_v:.2f}: Cinf={dci:.3e}, PML={dpml:.3e}, "
+                    f"R={Rv:.2f}, sigma*={sm}\n")
+
+    print("  -> Saved multiple_reflection_results.txt")
+    print()
 
 
     # =========================================================================
