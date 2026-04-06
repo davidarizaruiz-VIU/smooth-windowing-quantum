@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-PML Convergence Study — Definitive Resolution of Defect C1-nuevo
-=================================================================
+PML Convergence Study for the Multiple-Reflection Benchmark
+=============================================================
 
 This script provides four independent lines of evidence demonstrating
 that the PML error saturation in the multiple-reflection benchmark is

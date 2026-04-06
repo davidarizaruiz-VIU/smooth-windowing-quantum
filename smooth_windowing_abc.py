@@ -13,7 +13,7 @@ Theoretical foundation:
     J. Fourier Anal. Appl. 26 (2020) 65.
     https://doi.org/10.1007/s00041-020-09773-3
 
-This script runs twelve numerical experiments and generates publication-
+This script runs thirteen numerical experiments and generates publication-
 quality figures (300 dpi PNG/PDF) plus summary tables printed to stdout:
 
     Experiment  1 -- Gibbs suppression & L2 convergence (standard / Hann / C-inf)
@@ -37,6 +37,9 @@ quality figures (300 dpi PNG/PDF) plus summary tables printed to stdout:
                      universality (Gaussian/sech^2/rect), eta-saturation,
                      dt-anomaly diagnosis (Strang vs. Yoshida 4th-order),
                      fixed window-period prescription, reference convergence
+    Experiment 13 -- Multiple-reflection benchmark (C-inf windowing vs PML
+                     in confined-scattering regime with machine-precision
+                     reference solution)
 
 Usage:
     python smooth_windowing_abc.py
